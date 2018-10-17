@@ -1,0 +1,8 @@
+/BUILD
+/fallback_builds
+/mbed
+/*.html
+/*.bld
+/mbed_config.h
+/PeripheralPin_rebuild
+.mbed
