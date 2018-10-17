@@ -51,8 +51,8 @@ LinReg linear_regression(float* data, float ymean){
     x2Sum += xnorm * xnorm;
     y2Sum += ynorm * ynorm;
   }
-  float xstd = sqrt(x2sum / (REVIEW_WINDOW-1));
-  float ystd = sqrt(y2sum / (REVIEW_WINDOW-1));
+  float xstd = sqrt(x2Sum / (REVIEW_WINDOW-1));
+  float ystd = sqrt(y2Sum / (REVIEW_WINDOW-1));
   LinReg lr;
   lr.r = numTotal / sqrt(x2Sum * y2Sum);
   lr.b = lr.r * ystd / xstd;
