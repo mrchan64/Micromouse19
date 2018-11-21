@@ -24,10 +24,25 @@ struct IRData {
   float rf;
 };
 
+// ENUMS -----------------------------------------------------
+enum AsyncIRState {
+  IROFF,
+  IDLE1,
+  SCANFORWARD,
+  SCANSIDE,
+  IDLE2
+};
+
 // METHODS ---------------------------------------------------
 void initialize_IR();
 void read_forward(IRData* ird);
 void read_side(IRData* ird);
 IRData read_all();
+
+// ASYNC -----------------------------------------------------
+bool cycle_IR_async();
+IRData read_IR_async();
+void off_IR_async();
+void on_IR_async();
 
 #endif

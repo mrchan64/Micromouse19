@@ -12,6 +12,12 @@
 #include "mbed.h"
 #include "PinOut.hpp"
 
+// STRUCTS ---------------------------------------------------
+union float4serial {
+    float fl;
+    char buff[sizeof(float)];
+};
+
 // CONSTANTS -------------------------------------------------
 const int BAUD            = 115200;
 

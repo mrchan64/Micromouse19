@@ -119,7 +119,7 @@ void Motor::setStepAboveSpeed(float speed, int step){
       curr_speed = speed * mult;
     }
   }else{
-    for(int i = 0; i<step; i++){
+    for(int i = 0; i>step; i--){
       speed = curr_speed == 0.0f ? -1 * MIN_SPEED - .001 : curr_speed - SPEED_STEP;
       mult = speed > 0 ? 1 : -1;
       speed = abs(speed);
@@ -139,10 +139,25 @@ void Motor::setStepAboveSpeed(float speed, int step){
   }
 }
 
+// SYNCHRONOUS METHOD! ONLY USE THIS IN CALIBRATION
 void Motor::moveDistance(float dist_cm){
   // fill this out, figure out the ramp speed stuff
+  // jk this method is basically useless
+  float dist_ticks = dist_cm / (WHEEL_DIAM * PI) * ONE_REV;
+
+  Timer t; t.reset(); t.start();
+  while(getTicks() < dist_ticks){
+    int time = t.read_us();
+    float speed1 = time * RAMP_SPEED + MIN_SPEED;
+    float speed2 = MAX_SPEED;
+    float speed3 = (dist_ticks - getTicks()) / ONE_REV * 1.3f + MIN_SPEED;
+    float speedf = (speed1 < speed2) ? ((speed1 < speed3) ? speed1 : speed3) : speed2;
+    setSpeed(speedf);
+  }
+  setSpeed(0.0f);
 }
 
+// SYNCHRONOUS METHOD! ONLY USE THIS IN CALIBRATION
 void Motor::moveTicks(float dist_ticks){
   // same as ^^^
 }
@@ -155,6 +170,10 @@ int Motor::getTicks(){
   return enc.read();
 }
 
-int Motor::getDist(){
-  return enc.read();
+float Motor::getDist(){
+  return enc.read() / ONE_REV * WHEEL_DIAM * PI;
 }
+
+// MOTOR OBJECTS ---------------------------------------------
+Motor m_left('l');
+Motor m_right('r');

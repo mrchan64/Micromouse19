@@ -38,6 +38,8 @@ const char ACCEL_Z_H      = 0x2D;
 
 // GYRO CONSTANTS --------------------------------------------
 const float GYRO_SENSITIVITY_500DPS = 0.0175F;
+const int NORMALIZATION_DELAY_US    = 100;
+const int NORMALIZATION_WINDOW      = 100;
 
 // OBJECTS ---------------------------------------------------
 extern I2C i2c;
@@ -55,7 +57,9 @@ public:
   Gyro(int a);
   void reset();
   SensorData read();
+  void normalize();
   uint8_t error;
+  SensorData baseline;
 };
 
 class Accel {
@@ -63,7 +67,9 @@ public:
   Accel(int a);
   void reset();
   SensorData read();
+  void normalize();
   uint8_t error;
+  SensorData baseline;
 };
 
 // MORE OBJECTS ----------------------------------------------
@@ -75,5 +81,7 @@ void reset_sensors();
 SensorData read_gyro();
 SensorData read_accel();
 uint8_t read_sensor_error_state();
+void normalize_sensors();
+bool check_pause_state();
 
 #endif

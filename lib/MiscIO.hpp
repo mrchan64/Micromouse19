@@ -20,6 +20,8 @@ const float LIPO_MIN                = 7.0f;
 class LEDS{
 public:
   LEDS(int a);
+  void off();
+  void on(int a, int b, int c, int d, int e, int f);
   DigitalOut l1;
   DigitalOut l2;
   DigitalOut l3;

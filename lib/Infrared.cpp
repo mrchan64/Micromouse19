@@ -58,3 +58,69 @@ IRData read_all(){
 
   return ird;
 }
+
+// ASYNC -----------------------------------------------------
+
+Timer async_t;
+AsyncIRState async_IR_state = IROFF; // 0: off, 1: idle1, 2: reading forward, 3: reading side, 4: idle2
+bool dataRefreshed = false;
+IRData asyncData;
+
+bool cycle_IR_async() {
+  switch(async_IR_state){
+    case IROFF:
+      break;
+    case IDLE1:
+      ir_led_l = 1;
+      ir_led_r = 1;
+      async_t.reset();
+      async_t.start();
+      async_IR_state = SCANFORWARD;
+      break;
+    case SCANFORWARD:
+      if(async_t.read_us() >= LED_ON_US){
+        asyncData.l = ir_rec_l;
+        asyncData.r = ir_rec_r;
+        ir_led_l = 0;
+        ir_led_r = 0;
+        ir_led_lf = 1;
+        ir_led_rf = 1;
+        async_IR_state = SCANSIDE;
+      }
+      break;
+    case SCANSIDE:
+      if(async_t.read_us() >= LED_ON_US * 2){
+        asyncData.lf = ir_rec_lf;
+        asyncData.rf = ir_rec_rf;
+        ir_led_lf = 0;
+        ir_led_rf = 0;
+        async_IR_state = IDLE2;
+        dataRefreshed = true;
+      }
+      break;
+    case IDLE2:
+      if(async_t.read_us() >= LED_ON_US * 2 + LED_OFF_US){
+        async_IR_state = IDLE1;
+      }
+      break;
+  }
+  return dataRefreshed;
+}
+
+IRData read_IR_async() {
+  IRData ird = {asyncData.l, asyncData.r, asyncData.lf, asyncData.rf};
+  dataRefreshed = false;
+  return ird;
+}
+
+void off_IR_async() {
+  async_IR_state = IROFF;
+  ir_led_l = 0;
+  ir_led_r = 0;
+  ir_led_lf = 0;
+  ir_led_rf = 0;
+}
+
+void on_IR_async() {
+  async_IR_state = IDLE1;
+}

@@ -54,6 +54,9 @@ OBJECTS += lib/Serial.o
 OBJECTS += lib/SensorComm.o
 OBJECTS += lib/MiscIO.o
 OBJECTS += algo/IR_Detect.o
+OBJECTS += algo/Calibration.o
+OBJECTS += algo/MazeNode.o
+OBJECTS += debug/Debug.o
 OBJECTS += main.o
 
  SYS_OBJECTS += mbed/TARGET_NUCLEO_F446RE/TOOLCHAIN_GCC_ARM/hal_tick_overrides.o
