@@ -11,12 +11,14 @@
 
 #include "mbed.h"
 #include "../lib/MiscIO.hpp"
+#include "../lib/Serial.hpp"
 #include "SpeedSetter.hpp"
 #include "WallState.hpp"
-#include "MazeSolver.hpp"
+// #include "MazeSolver.hpp"
+#include "AlgoState.hpp"
 
 enum RunnerState{
-  IDLE,
+  RUN_IDLE,
   RUN_IR_ALIGN_SIDE,
   RUN_IR_ALIGN_FRONT,
   RUN_STRAIGHT_CLOSED,
@@ -24,15 +26,21 @@ enum RunnerState{
   RUN_STRAIGHT_RIGHT_OPEN,
   RUN_STRAIGHT_BOTH_OPEN,
   RUN_LEFT_TURN,
-  RUN_RIGHT_TURN
+  RUN_RIGHT_TURN,
+  RUN_U_TURN
 };
 
-const float END_OF_CELL_TO_TURN           = 4900.0f;
-const float DIST_TO_ALIGN                 = 5000.0f;
+const float DIST_CM_WALL                  = 3250.0f;
+const float DIST_CM_TURN                  = 7600.0f;
+const float DIST_TURN_CM                  = 4500.0f;
+const float DIST_TO_ALIGN                 = 3000.0f;
+const float DIST_FAST_ALIGN               = 1500.0f;
+const float SEACH_SIDE_MARG               = 500.0f;
 const float TIME_TO_ALIGN                 = 0.5f; //s
-const float END_OF_CELL_ALIGN_DIST        = ???
-const float BEG_OF_CELL_ALIGN_DIST        = ???
-const float BEG_OFFSET_DIST               = 0.0f;
+const float BEG_OFFSET_DIST               = 0000.0f;
+const float NUDGE_DIST                    = 500.0f;
+const float DIST_TURN_IMM                 = 3500.0f;
+const float DIST_TO_CENTER_FROM_NEW       = 2000.0f;
 const int CELLS_BEFORE_REALIGN            = 7;
 
 void runStateRunner();

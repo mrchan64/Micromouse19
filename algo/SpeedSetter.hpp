@@ -19,14 +19,15 @@ enum PIDState {
   STRAIGHT,
   LEFT,
   RIGHT,
-  UTURN
+  UTURN,
+  FALIGN
 };
 
 // CONSTANTS -------------------------------------------------
 // const float MAX_TPS                 = 4000.0f;
 // const float TPS_K                   = 0.000005f;
 const float CONST_DIST              = 2000.0f; // where to start pid from
-const float CONST_SPEED             = 10000.0f;
+const float CONST_SPEED             = 20000.0f;
 // const float CONST_SPEED             = 10000.0f;
 // const float RAMP_DOWN_DIST          = 20000.0f; // ticks
 const float UNIT_STEP_RANGE         = 50.0f;
@@ -51,18 +52,23 @@ const float SPID_MULT               = 0.00006f;
 const int NUM_DERIV_TIMES           = 100;
 
 const float ONE_CELL_TICKS          = 7250.0f; 
-const float RIGHT_ANG_TICKS         = 3850.0f;
+const float RIGHT_ANG_TICKS         = 4000.0f;
 const float PAST_OPENING_TICKS      = 1000.0f;
 
 // turning PID with gyro
 // const float DOM_PROP_K              = 1.0f;
 // const float DOM_INTEG_K             = 0.12f;
 // const float DOM_DERIV_K             = 450.0f;
-const float TURN_SPEED_MULT         = .00001f;
+const float TURN_SPEED_MULT         = .000005f;
 
 const float IR_STRAIGHT_MULT        = 4.0f;
 const float WALL_DIFF_DERIV_MULT    = 64.0f;
-const int IR_CORR_STEP = 30;
+const int IR_CORR_STEP = 10;
+const int FAST_CORR_MULT = 3;
+
+const float IR_ALIGN_MULT           = 0.05f;
+const int FALIGN_STEP               = 10;
+const int FALIGN_TIME_MS                  = 3000;
 
 // OBJECTS ---------------------------------------------------
 
@@ -72,11 +78,13 @@ void updateDistance(float distance);
 void initSpeedSetter();
 void setDistanceTicks(float ticks);
 void setAngleDegrees(PIDState dir);
+void setFrontAlign();
 void setSpeedTPS(float tps);
 void resetSpeedSetter();
 void runSpeedSetter();
 bool getSpeedCompletion();
 float getCurrDist();
 void toggleIRRun(bool on);
+void toggleFastAlign(bool on);
 
 #endif

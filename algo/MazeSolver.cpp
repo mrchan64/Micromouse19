@@ -79,8 +79,12 @@ void dfieldtarg(){
   Node* heap[ARRLEN];
   int heapStart = 0;
   int heapEnd = 0;
-  for(int i = 0; i< 4; i++){
-    Node* targ = targets[i];
+  for(int j = 0; j< 4; j++){
+    targets[j]->bfsexplored = EXPLORED;
+    dftarg[targets[j]->loc.x][targets[j]->loc.y]= 0;
+  }
+  for(int j = 0; j< 4; j++){
+    Node* targ = targets[j];
     for(int i = 0; i<4; i++){
       if(targ->nb[i]!=&nullNode && (targ->nb[i]->bfsexplored)==UNEXPLORED) heap[heapEnd++] = (targ->nb[i]);
     }
@@ -118,8 +122,12 @@ void dfieldme(){
   Node* heap[ARRLEN];
   int heapStart = 0;
   int heapEnd = 0;
-  for(int i = 0; i< 4; i++){
-    Node* targ = targets[i];
+  for(int j = 0; j< 4; j++){
+    targets[j]->bfsexplored = EXPLORED;
+    dftarg[targets[j]->loc.x][targets[j]->loc.y]= 0;
+  }
+  for(int j = 0; j< 4; j++){
+    Node* targ = targets[j];
     for(int i = 0; i<4; i++){
       if(targ->nb[i]!=&nullNode && (targ->nb[i]->bfsexplored)==UNEXPLORED) heap[heapEnd++] = (targ->nb[i]);
     }
@@ -246,6 +254,14 @@ int getDir(){
   return 0;
 }
 
+Direction runRight(Direction dir, CellWalls cw){
+  if(cw.front){
+    return static_cast<Direction>((dir+2)%4);
+  }else{
+    return dir;
+  }
+}
+
 // void run_maze_solve_cycle(){
 //   // run_IR_cycle();
 //   // SensorData g_dat = read_gyro();
@@ -263,10 +279,10 @@ int getDir(){
 //   }
 // }
 
-void runIdle(){
-  // do nothing
-  return;
-}
+// void runIdle(){
+//   // do nothing
+//   return;
+// }
 
 /* THIS IS THE CODE RUN IN THE ERROR STATE
  *

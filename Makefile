@@ -57,8 +57,10 @@ OBJECTS += algo/IR_Detect.o
 OBJECTS += algo/WallState.o
 OBJECTS += algo/SpeedSetter.o
 OBJECTS += algo/Calibration.o
-OBJECTS += algo/MazeNode.o
-OBJECTS += algo/MazeSolver.o
+# OBJECTS += algo/MazeNode.o
+# OBJECTS += algo/MazeSolver.o
+OBJECTS += algo/AlgoState.o
+OBJECTS += algo/StateRunner.o
 OBJECTS += debug/Debug.o
 OBJECTS += main.o
 

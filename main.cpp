@@ -16,8 +16,10 @@
 #include "algo/SpeedSetter.hpp"
 #include "algo/Calibration.hpp"
 #include "algo/WallState.hpp"
-#include "algo/MazeNode.hpp"
-#include "algo/MazeSolver.hpp"
+// #include "algo/MazeNode.hpp"
+// #include "algo/MazeSolver.hpp"
+#include "algo/AlgoState.hpp"
+#include "algo/StateRunner.hpp"
 #include "debug/Debug.hpp"
 
 int pause_ms = 200;
@@ -43,7 +45,7 @@ int main() {
   /*SPEEDSETTER*/
   initSpeedSetter();
   resetSpeedSetter();
-  setDistanceTicks(10*ONE_CELL_TICKS);
+  // setDistanceTicks(2000);
   // setDistanceTicks(2000);
   // setAngleDegrees(UTURN);
   int seq = 0;
@@ -53,42 +55,47 @@ int main() {
   Timer t;
   t.start();
 
-  while(true){
-    runSpeedSetter();
-    run_IR_cycle();
-    run_wall_update_cycle();
-    float ticks = getCurrDist();
-    CellWalls cw = get_curr_walls();
-    led.l1 = cw.left;
-    led.l3 = cw.front;
-    led.l5 = cw.right;
-    led.l4 = t.read_ms()%1000 > 500;
+  // while(true){
+  //   runSpeedSetter();
+  //   run_IR_cycle();
+  //   run_wall_update_cycle();
+  //   float ticks = getCurrDist();
+  //   CellWalls cw = get_curr_walls();
+  //   // toggleIRRun(false);
+  //   // led.l1 = cw.left;
+  //   // led.l3 = cw.front;
+  //   // led.l5 = cw.right;
+  //   // led.l4 = t.read_ms()%1000 > 500;
 
-    // if(!cw.right && seq==0){
-    //   setDistanceTicks(ticks+4900);
-    //   seq++;
-    // }
-    // if(getSpeedCompletion() && seq==1){
-    //   resetSpeedSetter();
-    //   setAngleDegrees(RIGHT);
-    //   seq++;
-    // }
-    // if(getSpeedCompletion() && seq==2){
-    //   resetSpeedSetter();
-    //   setDistanceTicks(10*ONE_CELL_TICKS);
-    //   seq=0;
-    // }
-  }
+  //   // if(!cw.right && seq==0){
+  //   //   setDistanceTicks(ticks+4500);
+  //   //   seq++;
+  //   // }
+  //   // // if(cw.right && seq==0){
+  //   // //   setDistanceTicks(ticks+6000);
+  //   // //   seq++;
+  //   // // }
+  //   // if(getSpeedCompletion() && seq==1){
+  //   //   resetSpeedSetter();
+  //   //   setAngleDegrees(RIGHT);
+  //   //   seq++;
+  //   // }
+  //   // if(getSpeedCompletion() && seq==2){
+  //   //   resetSpeedSetter();
+  //   //   setDistanceTicks(6000);
+  //   //   seq++;
+  //   // }
+  // }
 
 
 
 
 
 
-  float lastTime;
-  float lastTicks = 0.0f;
-  Direction facing = NORTH;
-  int mtype = 1;
+  // float lastTime;
+  // float lastTicks = 0.0f;
+  // Direction facing = NORTH;
+  // int mtype = 1;
   // 0 starting forward
   // 1 ex straight
   // 2 nudge forward
@@ -98,9 +105,26 @@ int main() {
   // 6 moving before turning
   // 7 moving until IR = -1
   // // on_async_sensor_cycle(true);
-  Direction targ = NORTH;
+  // Direction targ = NORTH;
 
-  initialize_maze();
+  // initialize_maze();
+  // setAngleDegrees(LEFT);
+  AlgoState::initMaze();
+  //setFrontAlign();
+
+  while(true){
+    runSpeedSetter();
+    run_IR_cycle();
+    run_wall_update_cycle();
+    // float ticks = getCurrDist();
+    CellWalls cw = get_curr_walls();
+    led.l1 = cw.left;
+    led.l3 = cw.front;
+    led.l5 = cw.right;
+    led.l4 = t.read_ms()%1000 > 500;
+    runStateRunner();
+  }
+
   // while(true){
   //   runSpeedSetter();
   //   run_IR_cycle();

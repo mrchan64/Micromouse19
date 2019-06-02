@@ -54,6 +54,10 @@ float subDerivError = 0.0f;
 // SPEED GATING
 bool gated = true;
 bool useIR = true;
+bool fastAlign = true;
+
+
+// CellWalls, 
 
 // HELPER METHODS --------------------------------------------
 void updateVals(){
@@ -275,6 +279,7 @@ void updateSpeedPID () {
 
     // step = ceil(wallDiffDeriv*wallDiffDeriv);
     step = IR_CORR_STEP;
+    if(fastAlign) step *= FAST_CORR_MULT;
     if(wallDiffDeriv==0){
       m_left.setSpeed(targspeed);
       m_right.setSpeed(targspeed);
@@ -285,6 +290,22 @@ void updateSpeedPID () {
       m_left.setStepAboveSpeed(targspeed, step);
       m_right.setStepAboveSpeed(targspeed, -step);
     }
+  }else if(currMovementState == FALIGN){
+    IRData ird = get_all_ave();
+    float currError = targtps - currtps;
+    derivtpsError = currError - error_tps_times[error_counter];
+    totaltpsError += derivtpsError;
+    // pc.printf("%.2f\n\r", totaltpsError);
+    error_tps_times[error_counter] = currError;
+
+    float targspeed = SPID_PROP_K * currError + SPID_INTEG_G * totaltpsError + SPID_DERIV_K * derivtpsError;
+    targspeed *= SPID_MULT;
+
+    int step = FALIGN_STEP;
+    if(ird.l - ird.r > 0) step=-step;
+    // if(currError > 0)step = -step;
+    m_left.setStepAboveSpeed(targspeed, step);
+    m_right.setStepAboveSpeed(targspeed, -step);
   }else{
     float unit = (wheelDiff / UNIT_STEP_RANGE);
     step = ceil(unit*unit);
@@ -317,6 +338,13 @@ void setDistanceTicks(float ticks) {
 void setAngleDegrees(PIDState dir) { // left = true, right = false;
   if(dir != STRAIGHT)currMovementState = dir;
   // targDegrees = angle;
+}
+
+void setFrontAlign(){
+  currMovementState = FALIGN;
+  t4.reset();
+  t4.start();
+
 }
 
 // void setSpeedTPS(float tps) {
@@ -378,7 +406,13 @@ void runSpeedSetter() {
       updateSpeeds();
       // led.on(0,0,1,0,0);
     }
+  }else if(currMovementState == FALIGN){
+    updateSpeedPID();
   }else{
+    IRData ird = get_all_ave();
+    float ave = (ird.l + ird.r)/2;
+    if(ave<0)targtps = CONST_SPEED;
+    else targtps = -CONST_SPEED;
     updateSpeeds();
   }
 }
@@ -387,6 +421,7 @@ bool getSpeedCompletion() {
 
   // check for completion
   if(currMovementState == STRAIGHT)return abs(currDist - targDist) < TICK_COMPLETION_MARGIN;
+  else if(currMovementState == FALIGN) return t4.read_ms() > FALIGN_TIME_MS;
   else return abs(currDist - RIGHT_ANG_TICKS) < TICK_COMPLETION_MARGIN;
   // bool conda = derivError == 0;
   // bool condb = currtps == 0;
@@ -399,4 +434,8 @@ float getCurrDist(){
 
 void toggleIRRun(bool on){
   useIR = on;
+}
+
+void toggleFastAlign(bool on){
+  fastAlign = on;
 }

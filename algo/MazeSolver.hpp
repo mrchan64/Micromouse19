@@ -45,6 +45,9 @@ void visitSquare(Direction dir, CellWalls cw, bool wallOnLeft, bool wallOnRight)
 Node* nextToMidSquare();
 int getDir();
 
+Direction runRight(Direction dir, CellWalls cw);
+
+
 // void run_maze_solve_cycle();
 
 #endif
