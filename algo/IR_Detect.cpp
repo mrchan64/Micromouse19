@@ -19,8 +19,17 @@ IRData f_thresh = {0.0f, 0.0f, 0.0f, 0.0f};
 IRData total = {0.0f, 0.0f, 0.0f, 0.0f};
 IRData norm_total = {0.0f, 0.0f, 0.0f, 0.0f};
 
-LinReg leftReg = {0.0f, 0.0f, 0.0f};
-LinReg rightReg = {0.0f, 0.0f, 0.0f};
+// secondary for that left side shit only lr should be used here
+IRData baseline2 = {0.0f, 0.0f, 0.0f, 0.0f};
+IRData f_thresh2 = {0.0f, 0.0f, 0.0f, 0.0f};
+IRData norm_total2 = {0.0f, 0.0f, 0.0f, 0.0f};
+
+IRData window[REVIEW_WINDOW];
+IRData normwindow[REVIEW_WINDOW];
+IRData normwindow2[REVIEW_WINDOW];
+
+// LinReg leftReg = {0.0f, 0.0f, 0.0f};
+// LinReg rightReg = {0.0f, 0.0f, 0.0f}; // Unused???
 
 // METHODS ---------------------------------------------------
 // median
@@ -44,27 +53,29 @@ float median(float* data){
 }
 
 // y = a + bx
-LinReg linear_regression(float* data, float ymean){
-  float xmean = REVIEW_WINDOW/2;
-  float numTotal = 0.0f;
-  float x2Sum = 0.0f;
-  float y2Sum = 0.0f;
-  float xnorm, ynorm;
-  for(int i = 0; i<REVIEW_WINDOW; i++){
-    xnorm = i-xmean;
-    ynorm = data[i]-ymean;
-    numTotal += xnorm * ynorm;
-    x2Sum += xnorm * xnorm;
-    y2Sum += ynorm * ynorm;
-  }
-  float xstd = sqrt(x2Sum / (REVIEW_WINDOW-1));
-  float ystd = sqrt(y2Sum / (REVIEW_WINDOW-1));
-  LinReg lr;
-  lr.r = numTotal / sqrt(x2Sum * y2Sum);
-  lr.b = lr.r * ystd / xstd;
-  lr.a = ymean - lr.b * xmean;
-  return lr;
-}
+// LinReg linear_regression(float* data, float ymean){
+//   // float xmean = REVIEW_WINDOW/2;
+//   // float numTotal = 0.0f;
+//   // float x2Sum = 0.0f;
+//   // float y2Sum = 0.0f;
+//   // float xnorm, ynorm;
+//   // for(int i = 0; i<REVIEW_WINDOW; i++){
+//   //   xnorm = i-xmean;
+//   //   ynorm = data[i]-ymean;
+//   //   numTotal += xnorm * ynorm;
+//   //   x2Sum += xnorm * xnorm;
+//   //   y2Sum += ynorm * ynorm;
+//   // }
+//   // float xstd = sqrt(x2Sum / (REVIEW_WINDOW-1));
+//   // float ystd = sqrt(y2Sum / (REVIEW_WINDOW-1));
+//   LinReg lr;
+//   // lr.r = numTotal / sqrt(x2Sum * y2Sum);
+//   // lr.b = lr.r * ystd / xstd;
+//   lr.r = 0.0f;
+//   lr.b = 0.0f;
+//   lr.a = ymean/* - lr.b * xmean*/;
+//   return lr;
+// }
 
 // mean
 IRData mean(){
@@ -91,7 +102,7 @@ void normalize_IR_sensors(){
     // window[counter] = read_all();
     // 2. ASYNC READING
     while(!cycle_IR_async()){
-      wait_us(1);
+      wait_us(100);
     }
     window[counter] = read_IR_async();
     data_lf[counter] = window[counter].lf;
@@ -125,7 +136,7 @@ void scale_IR_sensors(){
   total.r = 0.0f;
   for(counter = 0; counter < REVIEW_WINDOW; counter++){
     while(!cycle_IR_async()){
-      wait_us(1);
+      wait_us(100);
     }
     window[counter] = read_IR_async();
     data_l[counter] = window[counter].l;
@@ -153,7 +164,7 @@ void set_IR_threshold_forward(){
   total.r = 0.0f;
   for(counter = 0; counter < REVIEW_WINDOW; counter++){
     while(!cycle_IR_async()){
-      wait_us(1);
+      wait_us(100);
     }
     window[counter] = read_IR_async();
     data_l[counter] = window[counter].l;
@@ -178,7 +189,7 @@ void set_IR_threshold_left(){
   total.lf = 0.0f;
   for(counter = 0; counter < REVIEW_WINDOW; counter++){
     while(!cycle_IR_async()){
-      wait_us(1);
+      wait_us(100);
     }
     window[counter] = read_IR_async();
     data_lf[counter] = window[counter].lf;
@@ -199,7 +210,7 @@ void set_IR_threshold_right(){
   total.rf = 0.0f;
   for(counter = 0; counter < REVIEW_WINDOW; counter++){
     while(!cycle_IR_async()){
-      wait_us(1);
+      wait_us(100);
     }
     window[counter] = read_IR_async();
     data_rf[counter] = window[counter].rf;
@@ -228,16 +239,22 @@ void run_IR_cycle(){
 
     // for norm data
     old = normwindow[counter];
+    // IRData old2 = normwindow2[counter];
     IRData ndat;
+    // IRData ndat2;
     ndat.lf = (window[counter].lf - baseline.lf) * scaling.lf;
     ndat.l = (window[counter].l - baseline.l) * scaling.l;
     ndat.r = (window[counter].r - baseline.r) * scaling.r;
     ndat.rf = (window[counter].rf - baseline.rf) * scaling.rf;
+    // ndat2.lf = (window[counter].lf - baseline2.lf) * scaling.lf;
     normwindow[counter] = ndat;
+    // normwindow2[counter] = ndat2;
     norm_total.lf += normwindow[counter].lf - old.lf;
     norm_total.l += normwindow[counter].l - old.l;
     norm_total.r += normwindow[counter].r - old.r;
     norm_total.rf += normwindow[counter].rf - old.rf;
+    // norm_total2.lf += normwindow2[counter].lf - old2.lf;
+
   }
 }
 
@@ -246,10 +263,35 @@ IRData get_current_IR_data(){
 }
 
 IRData get_curr_norm_IR_data(){
-  IRData norm_curr = {0.0f, 0.0f, 0.0f, 0.0f};
-  norm_curr.lf = window[counter].lf-baseline.lf;
-  norm_curr.l = window[counter].l-baseline.l;
-  norm_curr.r = window[counter].r-baseline.r;
-  norm_curr.rf = window[counter].rf-baseline.rf;
-  return norm_curr;
+  return normwindow[counter];
+}
+
+IRData get_all_ave(){
+  IRData ird;
+  ird.lf = norm_total.lf/REVIEW_WINDOW;
+  ird.l = norm_total.l/REVIEW_WINDOW;
+  ird.r = norm_total.r/REVIEW_WINDOW;
+  ird.rf = norm_total.rf/REVIEW_WINDOW;
+  return ird;
+}
+
+// float get_lf_ave_2(){
+//   return norm_total2.lf/REVIEW_WINDOW;
+// }
+
+void print_threshold_vals(){
+  // print scaling
+  // print f_thresh
+  // print baseline
+  pc.printf("   lf\t\t| l\t\t| r\t\t| rf\n\r");
+  pc.printf("S: %.4f\t| %.4f\t| %.4f\t| %.4f\t| \n\r", scaling.lf, scaling.l, scaling.r, scaling.rf);
+  pc.printf("F: %.4f\t| %.4f\t| %.4f\t| %.4f\t| \n\r", f_thresh.lf, f_thresh.l, f_thresh.r, f_thresh.rf);
+  pc.printf("B: %.4f\t| %.4f\t| %.4f\t| %.4f\t| \n\r", baseline.lf, baseline.l, baseline.r, baseline.rf);
+}
+
+void setIRConstantsManual(IRData s, IRData f, IRData b){
+  // dont need to run normalize, or scale, or set threshold
+  scaling = s;
+  f_thresh = f;
+  baseline = b;
 }

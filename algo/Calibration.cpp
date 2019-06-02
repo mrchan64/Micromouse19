@@ -8,6 +8,7 @@
 
 #include "Calibration.hpp"
 #include "../lib/Serial.hpp"
+#include "IR_Detect.hpp"
 
 // METHODS ---------------------------------------------------
 
@@ -22,7 +23,17 @@ void pre_code(){
   if (s_e_s) pc.printf("Sensor error: %d\n", s_e_s);
   else normalize_sensors();
   wait(REST_TIME_US);
-  pc.printf("Voltage: %f\n", voltmeter); // ?????
+  float voltage = get_voltage();
+  pc.printf("Voltage: %f\n", voltage);
+  bool low_v = voltage < V_MIN;
+  if (s_e_s || low_v){ // stop all operation
+    while(true){
+      led.on(1,1,1,1,1);
+      wait_ms(300);
+      led.off();
+      wait_ms(300);
+    }
+  }
   cycle_leds(.25f);
 }
 
@@ -39,33 +50,33 @@ void pre_code(){
   */
 void mid_code(){
   move_dist(2.0f);
-  led.on(0,1,0,0,0,0);
+  led.on(0,1,0,0,0);
   wait(REST_TIME_US);
   scale_IR_sensors();
   wait(REST_TIME_US);
   move_dist(-2.0f);
   wait(REST_TIME_US);
-  turn_90();
-  led.on(0,0,1,0,0,0);
+  // turn_90();
+  led.on(0,0,1,0,0);
   wait(REST_TIME_US);
   set_IR_threshold_left();
   wait(REST_TIME_US);
-  turn_90();
-  led.on(0,0,0,1,0,0);
+  // turn_90();
+  led.on(0,0,0,1,0);
   wait(REST_TIME_US);
   set_IR_threshold_forward();
   wait(REST_TIME_US);
-  turn_90();
-  led.on(0,0,0,1,0,0);
+  // turn_90();
+  led.on(0,0,0,1,0);
   wait(REST_TIME_US);
   set_IR_threshold_right();
   wait(REST_TIME_US);
-  led.on(0,0,0,0,1,0);
+  led.on(0,0,0,0,1);
 }
 
 void post_code(){
   while(!check_pause_state()) {wait_us(1);}
-  led.on(0,1,0,0,1,0);
+  led.on(0,1,0,0,1);
   while(check_pause_state()) {wait_us(1);}
   led.off();
   wait_us(REST_TIME_US);
@@ -73,36 +84,36 @@ void post_code(){
 }
 
 // Turns 90 degrees cclockwise (left)
-void turn_90(){
-  Timer t;
-  int time;
-  int lasttime;
-  float timed;
-  float totalx = 0.0f;
-  float totaly = 0.0f;
-  float totalz = 0.0f;
-  SensorData gdat;
-  int c2 = 0;
-  t.start();
-  lasttime = t.read_us();
-  while(totalz < 90){
-    m_right.setSpeed(.08);
-    m_left.setSpeed(-.08);
-    c2++;
-    gdat = read_gyro();
-    time = t.read_us();
-    timed = (float) (time-lasttime)/1000000.0f;
-    totalx += timed * gdat.x;
-    totaly += timed * gdat.y;
-    totalz += timed * gdat.z;
-    lasttime = time;
+// void turn_90(){
+//   Timer t;
+//   int time;
+//   int lasttime;
+//   float timed;
+//   float totalx = 0.0f;
+//   float totaly = 0.0f;
+//   float totalz = 0.0f;
+//   SensorData gdat;
+//   int c2 = 0;
+//   t.start();
+//   lasttime = t.read_us();
+//   while(totalz < 90){
+//     m_right.setSpeed(.08);
+//     m_left.setSpeed(-.08);
+//     c2++;
+//     gdat = read_gyro();
+//     time = t.read_us();
+//     timed = (float) (time-lasttime)/1000000.0f;
+//     totalx += timed * gdat.x;
+//     totaly += timed * gdat.y;
+//     totalz += timed * gdat.z;
+//     lasttime = time;
 
-  }
-  t.stop();
+//   }
+//   t.stop();
 
-  m_left.setSpeed(0);
-  m_right.setSpeed(0);
-}
+//   m_left.setSpeed(0);
+//   m_right.setSpeed(0);
+// }
 
 void move_dist(float dist_cm){
   float dist_ticks = dist_cm / (WHEEL_DIAM * PI) * ONE_REV;
@@ -156,4 +167,69 @@ void align_front(float dist){
   int stepr = dat2.r>0 ? ceil(dat2.r/.005) : floor(dat2.r/.005);
   m_left.setStepAboveSpeed(0.0f, -stepl);
   m_right.setStepAboveSpeed(0.0f, -stepr);
+}
+
+
+// CODE FOR PRESETTING FTHRESH
+
+void run_threshold_calibration(){
+  /*
+  1. Cycles leds
+  2. initializes (pointing toward wall);
+  3. led2 turns on, move mouse toward wall (sets forward scaling)
+  4. led3 turns on, point left of mouse towards open
+  5. led4 turns on, point front of mouse towards open
+  6. led5 turns on, point right of mouse towards open
+  7. finished when leds turns off
+  */
+  // Timer cal;
+  // cal.start();
+  cycle_leds(.25f);
+  initialize_IR();
+  on_IR_async();
+  normalize_IR_sensors();
+
+  led.on(0,1,0,0,0);
+  wait(REST_TIME_US);
+  scale_IR_sensors();
+  led.on(0,0,1,0,0);
+  wait(REST_TIME_US);
+  set_IR_threshold_left();
+  led.on(0,0,0,1,0);
+  wait(REST_TIME_US);
+  set_IR_threshold_forward();
+  led.on(0,0,0,0,1);
+  wait(REST_TIME_US);
+  set_IR_threshold_right();
+  led.off();
+
+  print_threshold_vals();
+}
+
+void set_threshold_manual(){
+  initialize_IR();
+  setIRConstantsManual(PREV_S, PREV_F, PREV_B);
+  on_IR_async();
+  pc.printf("V: %f Volts\n\r", get_voltage());
+  cycle_leds(.25);
+  cycle_leds(.25);
+  uint8_t s_e_s = read_sensor_error_state();
+  if (s_e_s) pc.printf("Sensor error: %d\n", s_e_s);
+  else normalize_sensors();
+}
+
+void print_IR_vals(){
+  cycle_leds(.25f);
+  initialize_IR();
+  on_IR_async();
+  Timer t;
+  t.start();
+  while(true){
+    run_IR_cycle();
+    if(t.read_ms() > 3000){
+      t.reset();
+      pc.printf("%f %f %f %f\n\r", norm_total.lf / REVIEW_WINDOW, norm_total.l / REVIEW_WINDOW, norm_total.r / REVIEW_WINDOW, norm_total.rf / REVIEW_WINDOW);
+    }
+    wait_us(6);
+  }
 }

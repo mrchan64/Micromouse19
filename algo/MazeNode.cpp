@@ -10,6 +10,17 @@
 #include "MazeNode.hpp"
 
 // METHODS ---------------------------------------------------
+Node::Node(){
+  for(int i = 0; i< 4; i++){
+    this->nbwalls[i] = UNSURE;
+    this->nb[i] = NULL;
+  }
+  this->visited = UNVISITED;
+  this->bfsexplored = UNEXPLORED;
+  this->bfsScore = 0;
+  this->toVisit = false;
+}
+
 Node::Node(int x_pos, int y_pos){
   this->loc.x = x_pos;
   this->loc.y = y_pos;
@@ -19,10 +30,16 @@ Node::Node(int x_pos, int y_pos){
   }
   this->visited = UNVISITED;
   this->bfsexplored = UNEXPLORED;
-  this->bfsScore = 0.0f;
+  this->bfsScore = 0;
+  this->toVisit = false;
 }
 
-void Node::resolveWall(Direction dir, bool hasWall){
+void Node::setXY(int x_pos, int y_pos){
+  this->loc.x = x_pos;
+  this->loc.y = y_pos;
+}
+
+void Node::resolveWall(int dir, bool hasWall){
   if(this->nbwalls[dir] != UNSURE)return;
   if(hasWall){
     this->nbwalls[dir] = WALL;

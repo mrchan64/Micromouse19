@@ -13,7 +13,7 @@
 #include "../lib/Infrared.hpp"
 
 // CONSTANTS -------------------------------------------------
-const int REVIEW_WINDOW           = 100;
+const int REVIEW_WINDOW           = 20;
 const float THRESHOLD_MULTIPLIER  = 0.8f;
 
 // STRUCTS ---------------------------------------------------
@@ -45,9 +45,10 @@ extern IRData norm_total;
  *    - (-) <- (wall detected) < f_thresh.lf/rf < (wall not detected) < (+)
  */
 extern IRData f_thresh;
+extern IRData f_thresh2;
 
 // METHODS ---------------------------------------------------
-LinReg linear_regression(float* data, float ymean);
+// LinReg linear_regression(float* data, float ymean);
 void normalize_IR_sensors();
 void scale_IR_sensors();
 void set_IR_threshold_forward();
@@ -57,5 +58,11 @@ void run_IR_cycle();
 void detect_wall();
 IRData get_current_IR_data();
 IRData get_curr_norm_IR_data();
+IRData get_all_ave();
+// float get_lf_ave_2();
+
+void print_threshold_vals();
+void setIRConstantsManual(IRData s, IRData f, IRData b);
+void print_IR_vals();
 
 #endif

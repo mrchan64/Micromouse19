@@ -13,10 +13,11 @@
 #include "PinOut.hpp"
 
 // I2C ADDRESSES ---------------------------------------------
-const char GYRO_ADDR       = 0xD6;
-const char ACCEL_ADDR      = 0x32;
-const char GYRO_I2C_ID     = 0xD7;
-const char ACCEL_I2C_ID    = 0x33;
+const char GYRO_ADDR      = 0xD6;
+const char ACCEL_ADDR     = 0x32;
+const char GYRO_I2C_ID    = 0xD7;
+const char ACCEL_I2C_ID   = 0x33;
+const int I2C_FREQ        = 100000;
 
 // I2C REGISTERS ---------------------------------------------
 const char GYRO_CHIP_ID   = 0x0F;
@@ -51,6 +52,16 @@ struct SensorData {
   float z;
 };
 
+// enum AsyncPollState {
+//   ASYNC_IDLE,
+//   ASYNC_START,
+//   READ_GYRO_Z_LO,
+//   READ_GYRO_Z_HI,
+//   READ_ACCEL_X,
+//   READ_ACCEL_Y,
+//   READ_ACCEL_Z
+// };
+
 // CLASSES ---------------------------------------------------
 class Gyro {
 public:
@@ -73,15 +84,22 @@ public:
 };
 
 // MORE OBJECTS ----------------------------------------------
-extern Gyro m_gyro;
-extern Accel m_accel;
+// extern Gyro m_gyro;
+// extern Accel m_accel;
 
 // METHODS ---------------------------------------------------
 void reset_sensors();
-SensorData read_gyro();
-SensorData read_accel();
+// SensorData read_gyro();
+// SensorData read_accel();
 uint8_t read_sensor_error_state();
 void normalize_sensors();
 bool check_pause_state();
+// void run_async_sensor_cycle();
+// void on_async_sensor_cycle(bool run);
+void run_sensor_cycle();
+SensorData get_gyro_data();
+SensorData get_accel_data();
+void reset_angle_tracker();
+float get_curr_angle();
 
 #endif

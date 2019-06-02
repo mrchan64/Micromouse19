@@ -54,8 +54,11 @@ OBJECTS += lib/Serial.o
 OBJECTS += lib/SensorComm.o
 OBJECTS += lib/MiscIO.o
 OBJECTS += algo/IR_Detect.o
+OBJECTS += algo/WallState.o
+OBJECTS += algo/SpeedSetter.o
 OBJECTS += algo/Calibration.o
 OBJECTS += algo/MazeNode.o
+OBJECTS += algo/MazeSolver.o
 OBJECTS += debug/Debug.o
 OBJECTS += main.o
 

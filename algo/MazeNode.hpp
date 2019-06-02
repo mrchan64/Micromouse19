@@ -49,14 +49,18 @@ enum BFSExplored {
 // CLASSES ---------------------------------------------------
 class Node{
 public:
+  Node();
   Node(int x_pos, int y_pos);
+  void setXY(int x_pos, int y_pos);
   WallState nbwalls[4];
   Node* nb[4];
+  Node* previous;
   Visited visited;
+  bool toVisit;
   BFSExplored bfsexplored;
   Location loc;
-  float bfsScore;
-  void resolveWall(Direction dir, bool hasWall);
+  int bfsScore;
+  void resolveWall(int dir, bool hasWall);
   void visit();
   Direction entrance;
   Direction exit;

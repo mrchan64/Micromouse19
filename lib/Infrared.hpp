@@ -13,14 +13,15 @@
 #include "PinOut.hpp"
 
 // CONSTANTS -------------------------------------------------
-const int LED_ON_US           = 50;
-const int LED_OFF_US          = 10;
+// const int LED_ON_US           = 100;
+// const int LED_OFF_US          = 100;
+const int CYCLE_MULTIPLIER    = 3;
 
 // DATA STRUCTS ----------------------------------------------
 struct IRData {
+  float lf;
   float l;
   float r;
-  float lf;
   float rf;
 };
 
@@ -35,9 +36,9 @@ enum AsyncIRState {
 
 // METHODS ---------------------------------------------------
 void initialize_IR();
-void read_forward(IRData* ird);
-void read_side(IRData* ird);
-IRData read_all();
+// void read_forward(IRData* ird);
+// void read_side(IRData* ird);
+// IRData read_all();
 
 // ASYNC -----------------------------------------------------
 bool cycle_IR_async();

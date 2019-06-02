@@ -22,7 +22,12 @@ struct CellWalls {
 struct WallSlopes {
   LinReg left;
   LinReg right;
-}
+};
+
+struct WallVals {
+  float left;
+  float right;
+};
 
 // CONSTANTS -------------------------------------------------
 // Note that the window is 100 points right now, so slope of .3/100 = .003 is pretty reasonable rise
@@ -45,7 +50,8 @@ const float END_R2MIN                 = 0.5;
 // Variables -------------------------------------------------
 extern CellWalls currWalls;
 extern CellWalls wallStateChange;
-extern WallSlopes currSlopes;
+// extern WallSlopes currSlopes;
+extern WallVals currWallVals;
 extern bool can_check_wall;
 
 // METHODS ---------------------------------------------------
